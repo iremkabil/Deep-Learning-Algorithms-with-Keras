@@ -48,6 +48,33 @@ X_train, X_test, y_train, y_test = train_test_split(X_padded, y_encoded, test_si
 
 # %% create (build) lstm model
 
+from tensorflow.keras import backend as K
+import tensorflow as tf
+
+def f1_macro(y_true, y_pred):
+    # y_true: (batch,) int
+    y_true = tf.cast(y_true, tf.int32)
+    y_pred = tf.argmax(y_pred, axis=-1)               # (batch,)
+    y_pred = tf.cast(y_pred, tf.int32)
+
+    num_classes = 20
+    y_true = tf.one_hot(y_true, depth=num_classes)    # (batch, C)
+    y_pred = tf.one_hot(y_pred, depth=num_classes)    # (batch, C)
+
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = tf.cast(y_pred, tf.float32)
+
+    tp = tf.reduce_sum(y_true * y_pred, axis=0)
+    fp = tf.reduce_sum((1 - y_true) * y_pred, axis=0)
+    fn = tf.reduce_sum(y_true * (1 - y_pred), axis=0)
+
+    precision = tp / (tp + fp + K.epsilon())
+    recall = tp / (tp + fn + K.epsilon())
+    f1 = 2 * precision * recall / (precision + recall + K.epsilon())
+
+    return tf.reduce_mean(f1)
+
+
 def build_lstm_model():
     model = Sequential()
     
@@ -69,21 +96,57 @@ def build_lstm_model():
     # model compile
     model.compile(optimizer="adam",
                    loss="sparse_categorical_crossentropy",
-                   metrics=["accuracy"])
+                   metrics=["accuracy", f1_macro])
     return model
     
-# model olusturma
+# model olusturma 
 model = build_lstm_model()
 model.summary()
 
 # %% train lstm
 
 # callbacks = early stop
+early_stopping = EarlyStopping(monitor="val_accuracy", patience=5, restore_best_weights=True)
 
 # model train
 
+history = model.fit(X_train, y_train,
+                    epochs=5,
+                    batch_size=32,
+                    validation_split=0.1,
+                    callbacks = [early_stopping])
 # %% model evaluation
 
 # test veri seti ile degerlendirme
 
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f"Test loss: {loss: .3f}, Test Accuracy: {accuracy: .3f}")
+
 # history kullanarak accuracy ve loss degerlerini gorsellestirme
+plt.figure()
+
+# training loss ve val loss
+plt.subplot(1, 2, 1)
+plt.plot(history.history["loss"], label = "Training Loss")
+plt.plot(history.history["val_loss"], label="Validation Loss")
+plt.title("Training and Validation Loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.grid("True")
+
+# training accuracy ve val accuracy
+plt.subplot(1, 2, 2)
+plt.plot(history.history["accuracy"], label = "Training accuracy")
+plt.plot(history.history["val_accuracy"], label="Validation accuracy")
+plt.title("Training and Validation Accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.grid("True")
+
+
+
+
+
+
