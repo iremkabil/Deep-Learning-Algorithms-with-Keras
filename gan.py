@@ -39,14 +39,38 @@ def build_discriminator():
     
     #compile
     model.compile(loss = "binary_crossentropy", optimizer=Adam(0.0002, 0.5),metrics = ["accuracy"])
-    
+    return model
 # generator modelini tanimla
-
+def build_generator():
+    model = Sequential()
+    
+    model.add(Dense(7*7*128, input_dim=z_dim)) #gurultu vektorlerinden yuksek boyutlu uzaya donusum
+    model.add(LeakyReLU(aplha=0.2))
+    model.add(Reshape(7*7*128)) # cikisi (7*7*128) olacak sekilde ayarliyoruz
+    model.add(BatchNormalization())
+    model.add(Conv2DTranspose(64, kernel_size=3, strides=2, padding = "same"))
+    model.add(LeakyReLU(alpha=0.2))
+    model.add(BatchNormalization())
+    model.add(Conv2DTranspose(1, kernel_size = 3, strides=2, padding="same" , activation="tanh"))
+    return model
 # %% Create GAN model
 
-# compile
+# gan modeli olusturma
+def build_gan(generator, discriminator):
+    discriminator.trainable = False # discriminator egitilemez
+    
+    model = Sequential()
+    model.add(generator) # gan yapisina ilk olarak generator ekliyoruz
+    model.add(discriminator) # gan yapisina discriminator ekle
+    model.compile(loss = "binary_crossentropy", optimizer=Adam())
+    
+    return model
 
-# model olusturma
+discriminator = build_discriminator()
+generator = build_generator()
+gan = build_gan(generator, discriminator) # gan modeli olustur
+
+print(gan.summary())
 
 # %% Train GAN
 
