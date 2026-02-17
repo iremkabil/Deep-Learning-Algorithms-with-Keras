@@ -19,22 +19,34 @@ x_test = x_test.astype("float32")/255.0
 plt.figure()
 for i in range(4):
     plt.subplot(1,4, i+1)
-    plt.imshow(x_train[i], cmap = "gray")
-    plt.axis("off")
+    plt.imshow(x_train[i], cmap = "gray") # gri tonlu çizdir.
+    plt.axis("off") # eksenleri kapat
 plt.show()
 
+
 # veriyi duzlestir 28x28 boyutundaki goruntuleri 784 boyutuna bir vektore cevir
-x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
+# Dense katmanlar 2D ister: (N, features)
+# Dense kullanıyorsan resmi “düzleştir”. CNN kullanıyorsan düzleştirme şart değil.
+x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:]))) # 1. indeksten sonuna kadar al
 x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
 
 # %% encoder ve decoder mimarisi olusturma ve bunlari autoencoders mimarisine ekleme
+"""
+Encoder 784 → 64 sıkıştırır (özet çıkarır).
+Decoder 64 → 784 geri açar (yeniden üretir).
+
+64 burada bir “şişe boynu” (bottleneck). Modeli zorlayıp “gereksiz detayları atmayı” öğretir.
+Katmanlar 256 → 128 → 64 şeklinde küçülüyor.
+
+Autoencoder’ın olayı: “kendini kopyalamayı öğren”, ama dar boğazdan geçerken bilgi kaybetmeden.
+"""
 
 # autoencoders icin model parametrelerinin tanimlanmasi
-input_dim = x_train.shape[1] #giris boyutu (784)
-encoding_dim = 64 # latent boyutu (daha kucuk boyut)
+input_dim = x_train.shape[1] # giriş vektör boyutu = 784
+encoding_dim = 64 # “latent space” boyutu = 64
 
 # encoder kisminin insa edilmesi
-input_image =Input(shape = (input_dim,)) # girdi boyutunu belirliyoruz (784)
+input_image =Input(shape = (input_dim,)) # girdi boyutunu belirliyoruz, modele girecek her örnek 784 boyutlu
 encoded = Dense(256, activation="relu")(input_image) # ilk gizli katman(256 noron)
 encoded = Dense(128, activation = "relu")(encoded) # ilk gizli katman(256 noron)
 encoded = Dense(encoding_dim, activation="relu")(encoded) # sıkıstırma katmani(64 boyut)
@@ -44,7 +56,7 @@ decoded = Dense(128, activation="relu")(encoded) # ilk genisletme katmani
 decoded = Dense(256, activation="relu")(decoded) # ikinci genisletme katmani
 decoded = Dense(input_dim, activation = "sigmoid")(decoded) #cikti katmani (784 boyutlu)
 
-# autoencoders olusturma = ensoder + decoder
+# autoencoders olusturma = encoder + decoder
 autoencoder = Model(input_image, decoded ) # giristen ciktiya tum yapiya tanimliyoruz
 # modelin compile edilmesi
 autoencoder.compile(optimizer = Adam(), loss = "binary_crossentropy")
@@ -53,9 +65,9 @@ autoencoder.compile(optimizer = Adam(), loss = "binary_crossentropy")
 history = autoencoder.fit(x_train, x_train, # girdi ve hedef ayni deger olmali (otonom ogrenme)
                           epochs= 50,
                           batch_size =64,
-                          shuffle =True, # egitim verilerini karistir
+                          shuffle =True, # her epoch’ta sıralamayı karıştır, genelleme iyileşir.
                           validation_data = (x_test, x_test),
-                          verbose= 1)
+                          verbose= 1) # Her epoch için ilerleme çubuğu + metrikler gösterir
 
 # %% model testi
 
@@ -91,7 +103,28 @@ for i in range(n):
     ax.get_yaxis().set_visible(False) 
 plt.show()
 
+# ssim skorlarını hesapla
+def compute_ssim(orijinal, reconstructed):
+    
+    """
+        her iki goruntu arasinda ssim skoru (0-1) hesapla
+    """
+    orijinal = orijinal.reshape(28,28)
+    reconstructed = reconstructed.reshape(28,28)
+    return ssim(orijinal, reconstructed, data_range =1)
 
+# test veri seti icin ssim hesapla
+ssim_score = []
+
+# ilk 100 tanesini hesapla
+for i in range(100):
+    orijinal_img = x_test[i]
+    reconstructed_img = decoded_images[i]
+    score = compute_ssim(orijinal_img, reconstructed_img)
+    ssim_score.append(score)
+    
+average_ssim = np.mean(ssim_score)
+print("SSIM: ",average_ssim)
 
 
 
