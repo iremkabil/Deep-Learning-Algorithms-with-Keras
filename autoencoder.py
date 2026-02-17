@@ -80,7 +80,7 @@ decoder_layer1 = autoencoder.layers[-3](encoded_input)
 decoder_layer2 = autoencoder.layers[-2](decoder_layer1)
 decoder_output = autoencoder.layers[-1](decoder_layer2)
 
-decoder =Model(encoded_input, decoder_output)
+decoder =Model(encoded_input, decoder_output)  
 
 # test verisi ile encoder ve decoder ile sıkıstırma ve yeniden yapilandirma islemi
 encoded_images = encoder.predict(x_test) # latent temsili elde ederiz
