@@ -62,21 +62,48 @@ class ResNetModel(HyperModel):
         # siniflandirma katmani
         x = Flatten()(x)
         x = Dense(128, activation = "relu")(x)
-        outputs = Dense(10, actvation = "softmax")(x)
+        outputs = Dense(10, activation = "softmax")(x)
         
         model = Model(inputs, outputs)
         
         # compile model
-        model.compile(optimizer =Adam(hp.Float("Learing_rate", min_value= 1e-4,max_value=1e-2,samping = "LOG")),
+        model.compile(optimizer =Adam(hp.Float("Learing_rate", min_value= 1e-4,max_value=1e-2,sampling = "LOG")),
                       loss = "categorical_crossentropy",
                       metrics = ["accuracy"])
         return model
         
-
-
-
-
 # %% training, hyperparameter tuning and model evaluation
+
+tuner = RandomSearch(
+        ResNetModel(),
+        objective= "val_accuracy", # tuning referans degeri
+        max_trials = 2, # toplama deneme sayisi , min 100 kez dememiz gerekiyor
+        executions_per_trial = 1, # her denemede kac kere egitim yapilacaği
+        directory = "resnet_hyperparameter_tuning_directory",
+        project_name= "resnet_model_tuning"
+    )
+
+# hyperparametre optimizasyonu and training
+tuner.search(train_images, train_labels, epochs = 1, validation_data = (test_images, test_labels))
+
+# en iyi modeli alalim
+best_model = tuner.get_best_models(num_models=1)[0]
+
+# test seti ile
+test_loss, test_acc = best_model.evaluate(test_images,test_labels)
+print(f"Test Loss: {test_loss:.4f}, test accuracy: {test_acc:.4f}")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
