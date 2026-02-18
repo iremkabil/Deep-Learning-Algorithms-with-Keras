@@ -206,7 +206,9 @@ for i, ax in enumerate(axes.flat):
         color = "green"
     else:
         color = "red"
-    ax.set_title(f"True: {test_df.label.iloc[random_index[i]]} \n predict: {pred[random_index]}", color = color)
+    ax.set_title(
+        f"True: {test_df.label.iloc[random_index[i]]}\nPred: {pred[random_index[i]]}",
+        color=color)
 plt.tight_layout()
 
 
