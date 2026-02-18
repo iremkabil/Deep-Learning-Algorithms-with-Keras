@@ -164,6 +164,63 @@ history = model.fit(
     callbacks = [early_stopping, checkpoint_callback]
     )
 
+# %% testing
+
+loss, accuracy = model.evaluate(test_images, verbose = 1)
+print(f"Loss: {loss:.4f}, accuracy: {accuracy:.4f}")
+
+plt.figure()
+plt.subplot(1, 2, 1)
+plt.plot(history.history["accuracy"], marker="o" , label = "Training Accuracy")
+plt.plot(history.history["val_accuracy"], marker ="o",label = "Validation Accuracy")
+plt.title("Training adn Validation Accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.grid("True")
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history["loss"], marker="o", label = "Training Loss")
+plt.plot(history.history["val_loss"], marker="o", label = "Validation Loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.grid(True)
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+pred = model.predict(test_images)
+pred = np.argmax(pred, axis = 1)
+
+labels = (train_images.class_indices)
+labels = dict((v,k) for k,v in labels.items())
+
+pred = [labels[k] for k in pred]
+random_index = np.random.randint(0, len(test_df) - 1 ,15)
+fig, axes = plt.subplots(nrows = 5, ncols=3, figsize= (11,11))
+
+for i, ax in enumerate(axes.flat):
+    ax.imshow(plt.imread(image_df.filepath[random_index[i]]))
+    if test_df.label.iloc[random_index[i]] == pred[random_index[i]]: # dogru tahmin yaptiysak
+        color = "green"
+    else:
+        color = "red"
+    ax.set_title(f"True: {test_df.label.iloc[random_index[i]]} \n predict: {pred[random_index]}", color = color)
+plt.tight_layout()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
