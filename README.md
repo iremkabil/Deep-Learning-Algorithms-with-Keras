@@ -17,15 +17,19 @@ The goal of this project is to understand different neural network architectures
 - Radial Basis Function Networks (RBF)
 
 ### Advanced Models
-- Autoencoders
-- Generative Adversarial Networks (GAN)
+- Autoencoders  
+- Generative Adversarial Networks (GAN)  
+- Deep Q-Learning (DQL)  
+- ResNet Architectures  
+- Transformers  
+- Transfer Learning  
 
 ---
 
 ## 🧠 Repository Structure
 
-| File | Description |
-|------|-------------|
+| File / Folder | Description |
+|---------------|-------------|
 | `ann.py` | Artificial Neural Network implementation |
 | `cnn.py` | CNN for image classification |
 | `lstm.py` | LSTM for sequential/time-series data |
@@ -33,8 +37,13 @@ The goal of this project is to understand different neural network architectures
 | `gan.py` | Generative Adversarial Network |
 | `autoencoder.py` | Autoencoder for feature extraction |
 | `rbf.py` | Radial Basis Function Network |
-| `ann_best_model.h5` | Trained ANN model |
+| `dql.py` | Deep Q-Learning implementation |
+| `resnet.py` | ResNet-based deep learning model |
+| `transformers.py` | Transformer model implementation |
+| `transfer_learning/` | Transfer learning experiments |
 | `plot_cnn*.png` | CNN training visualizations |
+| `.gitignore` | Git ignore rules |
+| `README.md` | Project documentation |
 
 ---
 
@@ -42,11 +51,15 @@ The goal of this project is to understand different neural network architectures
 
 - Dataset preprocessing
 - One-hot encoding
-- Model building with Keras Sequential API
+- Feature scaling & normalization
+- Model building with Keras Sequential & Functional API
 - Training and evaluation
 - Hyperparameter tuning
 - Prediction and inference
+- Model visualization
 - Model saving/loading
+- Reinforcement learning basics
+- Transfer learning workflows
 
 ---
 
@@ -63,7 +76,8 @@ The goal of this project is to understand different neural network architectures
 
 ## 🎯 Purpose
 
-This repository represents hands-on practice with multiple deep learning architectures and serves as a personal learning portfolio.
+This repository represents hands-on practice with multiple deep learning architectures, including CNNs, RNNs, GANs, Transformers, and Reinforcement Learning models.  
+It serves as a personal learning portfolio demonstrating end-to-end deep learning workflows.
 
 ---
 
